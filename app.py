@@ -4,14 +4,15 @@ from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_restful import Api, Resource
-
+from flask_cors import CORS
+from loguru import logger
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/flask_api.db'
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 api = Api(app, prefix='/api/v0')
-
+CORS(app)
 
 
 class User(db.Model):

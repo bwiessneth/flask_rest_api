@@ -11,8 +11,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/flask_api.db'
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app, prefix='/api/v0')
-CORS(app)
 
 
 class User(db.Model):
@@ -28,21 +28,23 @@ class User(db.Model):
 class UserSchema(ma.Schema):
 	"""Marshmallow output schema"""
 	class Meta:
-		fields = ("id", "username", "email")
+		fields = ("id", "username", "email", "_links")
 
-
-class UsersResource(Resource):
-	"""API ressource for all users"""
-	def get(self):
-		users = User.query.all()
-		return users_schema.dump(users)
+	_links = ma.Hyperlinks({                                                                                                           
+        "uri": ma.URLFor("user", id="<id>"),
+		"url": ma.AbsoluteURLFor("user", id="<id>")
+	})
 
 
 class UserResource(Resource):
 	"""API ressource for a single user"""
-	def get(self, user_id=0):
-		user = User.query.get_or_404(user_id)
-		return user_schema.dump(user)
+	def get(self, id=None):
+		if id:
+			user = User.query.get_or_404(id)
+			return user_schema.dump(user)
+		else:
+			users = User.query.all()
+			return users_schema.dump(users)
 
 	def post(self):
 		user = User(
@@ -53,8 +55,8 @@ class UserResource(Resource):
 		db.session.commit()
 		return user_schema.dump(user)
 
-	def patch(self, user_id):
-		user = User.query.get_or_404(user_id)
+	def patch(self, id):
+		user = User.query.get_or_404(id)
 		print(request.json)
 
 		if 'username' in request.json:
@@ -65,8 +67,8 @@ class UserResource(Resource):
 		db.session.commit()
 		return user_schema.dump(user)
 
-	def delete(self, user_id):
-		user = User.query.get_or_404(user_id)
+	def delete(self, id):
+		user = User.query.get_or_404(id)
 		db.session.delete(user)
 		db.session.commit()
 		return '', 204
@@ -74,8 +76,7 @@ class UserResource(Resource):
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
-api.add_resource(UsersResource, '/users')
-api.add_resource(UserResource, '/user', '/user/<int:user_id>')
+api.add_resource(UserResource, '/user', '/user/<int:id>', endpoint='user')
 
 
 class PrefixMiddleware(object):
@@ -98,6 +99,7 @@ class PrefixMiddleware(object):
 
 # Set the prefix for serving the app. Uncomment if '/' shall be used
 app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_api')
+
 
 # index endpoint
 @app.route("/")

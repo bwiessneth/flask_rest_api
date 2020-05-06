@@ -8,15 +8,42 @@ from flask_cors import CORS
 from loguru import logger
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/flask_api.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_api.db'
 db = SQLAlchemy(app)
+
+# Using Marshmallow for serialization/deserialization
 ma = Marshmallow(app)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Set CORS options on app configuration
+app.config['CORS_HEADERS'] = "Content-Type"
+app.config['CORS_RESOURCES'] = {r"/api/v0/*": {"origins": "*"}}
+CORS(app)
+
+# Create Api for this flask application using prefix
 api = Api(app, prefix='/api/v0')
 
 
+class PrefixMiddleware(object):
+	"""Class to enable serving the app from a prefix"""
+	def __init__(self, app, prefix=''):
+		self.app = app
+		self.prefix = prefix
+
+	def __call__(self, environ, start_response):
+		if environ['PATH_INFO'].startswith(self.prefix):
+			environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
+			environ['SCRIPT_NAME'] = self.prefix
+			return self.app(environ, start_response)
+		else:
+			start_response('404', [('Content-Type', 'text/plain')])
+			return ["This url does not belong to the app.".encode()]
+
+# Set the prefix for serving the app. Uncomment if '/' shall be used
+app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_api')
+
+
 class User(db.Model):
-	"""SQLAlchemy model/descirption for User"""
+	"""SQLAlchemy model/description for our users"""
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(80), unique=True, nullable=False)
 	email = db.Column(db.String(120), unique=True, nullable=False)
@@ -73,39 +100,22 @@ class UserResource(Resource):
 		db.session.commit()
 		return '', 204
 
-
+# Specify which output schema to use for a single user
 user_schema = UserSchema()
+
+# Specify which output schema to use for a list of users
 users_schema = UserSchema(many=True)
+
+# Add endpoint for the User ressource
 api.add_resource(UserResource, '/user', '/user/<int:id>', endpoint='user')
 
 
-class PrefixMiddleware(object):
-	"""
-	Class to enable serving the app from a prefix
-	"""
-
-	def __init__(self, app, prefix=''):
-		self.app = app
-		self.prefix = prefix
-
-	def __call__(self, environ, start_response):
-		if environ['PATH_INFO'].startswith(self.prefix):
-			environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
-			environ['SCRIPT_NAME'] = self.prefix
-			return self.app(environ, start_response)
-		else:
-			start_response('404', [('Content-Type', 'text/plain')])
-			return ["This url does not belong to the app.".encode()]
-
-# Set the prefix for serving the app. Uncomment if '/' shall be used
-app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_api')
-
-
-# index endpoint
+# Index endpoint
 @app.route("/")
 def index():
 	message = "Hello from flask_api"
 	return render_template('index.html', message=message)
+
 
 # If app.py is run directly start in debug mode
 if __name__ == "__main__":

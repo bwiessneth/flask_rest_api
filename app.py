@@ -9,6 +9,7 @@ from loguru import logger
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_api.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Using Marshmallow for serialization/deserialization
@@ -39,7 +40,7 @@ class PrefixMiddleware(object):
 			return ["This url does not belong to the app.".encode()]
 
 # Set the prefix for serving the app. Uncomment if '/' shall be used
-app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_api')
+app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_rest_api')
 
 
 class User(db.Model):

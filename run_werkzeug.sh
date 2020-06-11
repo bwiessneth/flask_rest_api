@@ -1,3 +1,3 @@
 source ENV/bin/activate
 
-python app.py
+python flask_rest_api.py

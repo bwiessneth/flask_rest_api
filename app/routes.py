@@ -1,5 +1,5 @@
 from app import app, ma, db, api
-from app.models import User
+from app.models import User, Department
 from flask_restful import Resource
 from flask import render_template
 
@@ -9,13 +9,15 @@ def index():
 	message = "Hello from flask_rest_api"
 	return render_template('index.html', message=message)
 
+
+
 class UserSchema(ma.Schema):
 	"""Marshmallow output schema"""
 	class Meta:
-		fields = ("id", "username", "email", "_links")
+		fields = ("id", "username", "email", "department_id", "_links")
 
 	_links = ma.Hyperlinks({
-		"uri": ma.URLFor("user", id="<id>"),
+		# "uri": ma.URLFor("user", id="<id>"),
 		"url": ma.AbsoluteURLFor("user", id="<id>")
 	})
 
@@ -56,11 +58,38 @@ class UserResource(Resource):
 		db.session.commit()
 		return '', 204
 
-# Specify which output schema to use for a single user
-user_schema = UserSchema()
+class DepartmentSchema(ma.Schema):
+	"""Marshmallow output schema"""
+	class Meta:
+		fields = ["name", "id", "users", "_links"]
 
-# Specify which output schema to use for a list of users
+	users = ma.Nested(UserSchema, many=True)
+
+	_links = ma.Hyperlinks({
+		# "uri": ma.URLFor("department", id="<id>"),
+		"url": ma.AbsoluteURLFor("department", id="<id>")
+	})
+
+class DepartmentResource(Resource):
+	"""API ressource for a single user"""
+	def get(self, id=None):
+		if id:
+			department = Department.query.get_or_404(id)
+			return department_schema.dump(department)
+		else:
+			departments = Department.query.all()
+			return departments_schema.dump(departments)
+
+
+
+user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
-# Add endpoint for the User ressource
-api.add_resource(UserResource, '/user', '/user/<int:id>', endpoint='user')	
+department_schema = DepartmentSchema()
+departments_schema = DepartmentSchema(many=True)
+
+
+
+# Add endpoints
+api.add_resource(UserResource, '/user', '/user/<int:id>', endpoint='user')
+api.add_resource(DepartmentResource, '/department', '/department/<int:id>', endpoint='department')

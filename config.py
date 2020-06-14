@@ -6,7 +6,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config(object):
-	FLASK_RUN_PORT = 8888
+	FLASK_RUN_PORT = 1025
 	SECRET_KEY = 'jpZdNmgR9kqeemN7'
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
 		'sqlite:///' + os.path.join(basedir, 'app.db')

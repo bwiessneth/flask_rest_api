@@ -18,7 +18,7 @@ def create_app(config_class=Config):
 	app.config.from_object(config_class)
 
 	# Set the prefix for serving the app. Uncomment if '/' shall be used
-	app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask')
+	app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_rest_api')
 
 	# Init database, create tables if needed
 	db.init_app(app)

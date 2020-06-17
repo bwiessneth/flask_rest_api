@@ -2,6 +2,7 @@ from app import app, ma, db, api
 from app.models import User, Department
 from flask_restful import Resource
 from flask import render_template
+from flask import request
 
 # Index endpoint
 @app.route("/")
@@ -33,8 +34,8 @@ class UserResource(Resource):
 
 	def post(self):
 		user = User(
-			username=request.json['username'],
-			email=request.json['email']
+			username=request.json["username"],
+			email=request.json["email"]
 		)
 		db.session.add(user)
 		db.session.commit()
@@ -42,7 +43,6 @@ class UserResource(Resource):
 
 	def patch(self, id):
 		user = User.query.get_or_404(id)
-		print(request.json)
 
 		if 'username' in request.json:
 			user.username = request.json['username']
@@ -79,6 +79,29 @@ class DepartmentResource(Resource):
 		else:
 			departments = Department.query.all()
 			return departments_schema.dump(departments)
+
+	def post(self):
+		department = Department(
+			name=request.json["name"]
+		)
+		db.session.add(department)
+		db.session.commit()
+		return department_schema.dump(department)
+
+	def patch(self, id):
+		department = Department.query.get_or_404(id)
+
+		if 'name' in request.json:
+			department.name = request.json['name']
+
+		db.session.commit()
+		return department_schema.dump(department)
+
+	def delete(self, id):
+		department = Department.query.get_or_404(id)
+		db.session.delete(department)
+		db.session.commit()
+		return '', 204			
 
 
 

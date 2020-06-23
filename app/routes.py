@@ -19,7 +19,8 @@ class UserSchema(ma.Schema):
 
 	_links = ma.Hyperlinks({
 		# "uri": ma.URLFor("user", id="<id>"),
-		"url": ma.AbsoluteURLFor("user", id="<id>")
+		"url": ma.AbsoluteURLFor("user", id="<id>"),
+		"department": ma.AbsoluteURLFor("department", id="<department_id>")
 	})
 
 class UserResource(Resource):
@@ -101,7 +102,7 @@ class DepartmentResource(Resource):
 		department = Department.query.get_or_404(id)
 		db.session.delete(department)
 		db.session.commit()
-		return '', 204			
+		return '', 204
 
 
 

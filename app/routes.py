@@ -47,8 +47,11 @@ class UserResource(Resource):
 
 		if 'username' in request.json:
 			user.username = request.json['username']
-		if 'email' in request.json:
+		if 'email' in request.json:			
 			user.email = request.json['email']
+		if 'department_id' in request.json:
+			if Department.query.get(department_id):
+				user.department_id = request.json['department_id']
 
 		db.session.commit()
 		return user_schema.dump(user)

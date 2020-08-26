@@ -47,7 +47,7 @@ class UserResource(Resource):
 
 		if 'username' in request.json:
 			user.username = request.json['username']
-		if 'email' in request.json:			
+		if 'email' in request.json:
 			user.email = request.json['email']
 		if 'department_id' in request.json:
 			department = Department.query.get(request.json["department_id"])
@@ -110,7 +110,14 @@ class DepartmentResource(Resource):
 		db.session.commit()
 		return '', 204
 
-
+class UsersByDepartment(Resource):
+	"""API ressource for all users related to a specific department"""
+	def get(self, id=None):
+		if id:
+			users = User.query.filter(department_id=id).all()
+			return users_schema.dump(users)
+		else:
+			return None
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -123,3 +130,4 @@ departments_schema = DepartmentSchema(many=True)
 # Add endpoints
 api.add_resource(UserResource, '/user', '/user/<int:id>', endpoint='user')
 api.add_resource(DepartmentResource, '/department', '/department/<int:id>', endpoint='department')
+api.add_resource(DepartmentResource, '/department/<int:id>/users', endpoint='department_users')

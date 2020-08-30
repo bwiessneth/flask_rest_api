@@ -1,17 +1,31 @@
 #!/usr/bin/env python3.6
 import os
-from flask import Flask
+from flask import Flask, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_restful import Api
+from flask_restful_swagger import swagger
 from flask_cors import CORS
 from flask_middleware import PrefixMiddleware
 from config import Config
 
 app = Flask(__name__)
+
 db = SQLAlchemy()
 ma = Marshmallow()
-api = Api(prefix='/api/v0')
+
+api_v0 = Blueprint("api", __name__)
+
+api = swagger.docs(
+	Api(api_v0),
+	apiVersion="0.0",
+	basePath="http://localhost:5000",
+	resourcePath="/",
+	produces=["application/json", "text/html"],
+	api_spec_url="/spec",
+	description="API v0 description",
+)
+
 
 def create_app(config_class=Config):
 	# app = Flask(__name__)
@@ -31,7 +45,9 @@ def create_app(config_class=Config):
 	# Create Api for this flask application using prefix
 	api.init_app(app)
 
+	app.register_blueprint(api_v0, url_prefix="/api/v0")
 	return app
+
 
 from app import models
 from app import routes

@@ -1,10 +1,10 @@
 from app import app, ma, db, api
 from app.models import User, Department
 from flask_restful import Resource
-from flask import render_template
-from flask import request
-from flask import jsonify
-from marshmallow import pre_dump, post_dump, pre_load, post_load, fields
+from flask_restful import reqparse
+from flask_restful_swagger import swagger
+from flask import render_template, request
+from marshmallow import fields
 
 
 # Index endpoint
@@ -24,31 +24,39 @@ class UserSchema(ma.Schema):
 	total = fields.Integer(dump_to='totalItems')
 
 	_links = ma.Hyperlinks({
-		"self": ma.AbsoluteURLFor("users", id="<id>"),
-		"collection": ma.AbsoluteURLFor("users"),
-		"department": ma.AbsoluteURLFor("departments", id="<department_id>")
+		"self": ma.AbsoluteURLFor("api.users", id="<id>"),
+		"collection": ma.AbsoluteURLFor("api.users"),
+		"department": ma.AbsoluteURLFor("api.departments", id="<department_id>")
 	})
 
 
 class UserResource(Resource):
 	"""API ressource for Users"""
+
+	@swagger.operation()
 	def get(self, id=None):
 		if id:
 			user = User.query.get_or_404(id)
-			return user_schema.dump(user)
-		else:
-			offset = request.args.get('offset', 1, type=int)
-			limit = request.args.get('limit', 10, type=int)
-			users_query = User.query.paginate(offset, limit, False)
-			total = users_query.total
-			users_items = users_query.items
 			data = dict()
-			data["offset"] = offset
-			data["limit"] = limit
+			data["data"] = user_schema.dump(user)
+			return data			
+		else:
+			parser = reqparse.RequestParser()
+			parser.add_argument('offset', type=int, help='Offset value invalid', default=1)
+			parser.add_argument('limit', type=int, help='Limit value invalid', default=10)
+			args = parser.parse_args()
+
+			query = User.query.paginate(args.offset, args.limit, False)
+			total = query.total
+			query_items = query.items
+			data = dict()
+			data["offset"] = args.offset
+			data["limit"] = args.limit
 			data["total"] = total
-			data["data"] = users_schema.dump(users_items)
+			data["data"] = users_schema.dump(query_items)
 			return data
 
+	@swagger.operation()
 	def post(self):
 		user = User(
 			username=request.json["username"],
@@ -58,6 +66,7 @@ class UserResource(Resource):
 		db.session.commit()
 		return user_schema.dump(user)
 
+	@swagger.operation()
 	def patch(self, id):
 		user = User.query.get_or_404(id)
 
@@ -75,6 +84,7 @@ class UserResource(Resource):
 		db.session.commit()
 		return user_schema.dump(user)
 
+	@swagger.operation()
 	def delete(self, id):
 		user = User.query.get_or_404(id)
 		db.session.delete(user)
@@ -88,21 +98,38 @@ class DepartmentSchema(ma.Schema):
 		fields = ["name", "id", "_links"]
 
 	_links = ma.Hyperlinks({
-		"self": ma.AbsoluteURLFor("departments", id="<id>"),
-		"users": ma.AbsoluteURLFor("department_users", id="<id>")
+		"self": ma.AbsoluteURLFor("api.departments", id="<id>"),
+		"users": ma.AbsoluteURLFor("api.department_users", id="<id>")
 	})
 
 
 class DepartmentResource(Resource):
-	"""API ressource for a Departments"""
+	"""API ressource for Departments"""
+	
+	@swagger.operation()	
 	def get(self, id=None):
 		if id:
 			department = Department.query.get_or_404(id)
-			return department_schema.dump(department)
+			data = dict()
+			data["data"] = department_schema.dump(department)
+			return data						
 		else:
-			departments = Department.query.all()
-			return departments_schema.dump(departments)
+			parser = reqparse.RequestParser()
+			parser.add_argument('offset', type=int, help='Offset value invalid', default=1)
+			parser.add_argument('limit', type=int, help='Limit value invalid', default=10)
+			args = parser.parse_args()
 
+			query = Department.query.paginate(args.offset, args.limit, False)
+			total = query.total
+			query_items = query.items
+			data = dict()
+			data["offset"] = args.offset
+			data["limit"] = args.limit
+			data["total"] = total
+			data["data"] = departments_schema.dump(query_items)
+			return data
+
+	@swagger.operation()
 	def post(self):
 		department = Department(
 			name=request.json["name"]
@@ -111,6 +138,7 @@ class DepartmentResource(Resource):
 		db.session.commit()
 		return department_schema.dump(department)
 
+	@swagger.operation()
 	def patch(self, id):
 		department = Department.query.get_or_404(id)
 
@@ -120,6 +148,7 @@ class DepartmentResource(Resource):
 		db.session.commit()
 		return department_schema.dump(department)
 
+	@swagger.operation()
 	def delete(self, id):
 		department = Department.query.get_or_404(id)
 		db.session.delete(department)
@@ -128,20 +157,32 @@ class DepartmentResource(Resource):
 
 
 class UsersByDepartment(Resource):
-	"""API ressource for all Users within Departments"""
+	"""API ressource for Users within a Department"""
 	def get(self, id=None):
 		if id:
-			users = User.query.filter(User.department_id==id)
-			return users_schema.dump(users)
+			parser = reqparse.RequestParser()
+			parser.add_argument('offset', type=int, help='Offset value invalid', default=1)
+			parser.add_argument('limit', type=int, help='Limit value invalid', default=10)
+			args = parser.parse_args()
+
+			query = User.query.filter(User.department_id==id).paginate(args.offset, args.limit, False)
+			total = query.total
+			query_items = query.items
+			data = dict()
+			data["offset"] = args.offset
+			data["limit"] = args.limit
+			data["total"] = total
+			data["data"] = users_schema.dump(query_items)
+			return data
 		else:
 			return None
+
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 department_schema = DepartmentSchema()
 departments_schema = DepartmentSchema(many=True)
-
 
 
 # Add endpoints

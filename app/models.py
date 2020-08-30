@@ -11,6 +11,7 @@ class Department(db.Model):
 	def __repr__(self):
 		return '<Department %r>' % self.name	
 
+
 class User(db.Model):
 	"""SQLAlchemy model/description for our users"""
 	__tablename__ = 'user'

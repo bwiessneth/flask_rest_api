@@ -6,10 +6,9 @@ from flask_marshmallow import Marshmallow
 from flask_restful import Api
 from flask_restful_swagger import swagger
 from flask_cors import CORS
-from flask_middleware import PrefixMiddleware
 from config import Config
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/flask_rest_api/static')
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -31,9 +30,6 @@ def create_app(config_class=Config):
 	# app = Flask(__name__)
 	app.config.from_object(config_class)
 
-	# Set the prefix for serving the app. Uncomment if '/' shall be used
-	app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/flask_rest_api')
-
 	# Init database, create tables if needed
 	db.init_app(app)
 	with app.app_context():
@@ -45,7 +41,7 @@ def create_app(config_class=Config):
 	# Create Api for this flask application using prefix
 	api.init_app(app)
 
-	app.register_blueprint(api_v0, url_prefix="/api/v0")
+	app.register_blueprint(api_v0, url_prefix="/")
 	return app
 
 

@@ -36,8 +36,8 @@ class UserResource(Resource):
 			return data			
 		else:
 			parser = reqparse.RequestParser()
-			parser.add_argument('offset', type=int, help='Offset value invalid', default=1)
-			parser.add_argument('limit', type=int, help='Limit value invalid', default=10)
+			parser.add_argument('offset', type=int, help='Offset value invalid', default=0)
+			parser.add_argument('limit', type=int, help='Limit value invalid', default=100)
 			args = parser.parse_args()
 
 			query = User.query.paginate(args.offset, args.limit, False)
@@ -109,8 +109,8 @@ class DepartmentResource(Resource):
 			return data						
 		else:
 			parser = reqparse.RequestParser()
-			parser.add_argument('offset', type=int, help='Offset value invalid', default=1)
-			parser.add_argument('limit', type=int, help='Limit value invalid', default=10)
+			parser.add_argument('offset', type=int, help='Offset value invalid', default=0)
+			parser.add_argument('limit', type=int, help='Limit value invalid', default=100)
 			args = parser.parse_args()
 
 			query = Department.query.paginate(args.offset, args.limit, False)
@@ -181,5 +181,5 @@ departments_schema = DepartmentSchema(many=True)
 
 # Add endpoints
 api.add_resource(UserResource, '/users', '/users/<int:id>', endpoint='users')
-api.add_resource(DepartmentResource, '/departments', '/departments/<int:id>', endpoint='departments')
+api.add_resource(DepartmentResource, '/departments', '/departments/<string:id>', endpoint='departments')
 api.add_resource(UsersByDepartment, '/departments/<int:id>/users', endpoint='department_users')

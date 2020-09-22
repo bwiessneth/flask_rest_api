@@ -8,20 +8,20 @@ All endpoints will return JSON formatted output.
 
 
 
-User
-====
+Users
+=====
 
 The ``/users`` endpoint provides the User ressource.
 
-=========== ================= =======================
-HTTP Method URI               Action
-=========== ================= =======================
-GET         api/v0/users      Retrieve list of users
-GET         api/v0/users/[id] Retrieve a user
-POST        api/v0/users      Create a new user
-PUT         api/v0/users/[id] Update an existing user
-DELETE      api/v0/users/[id] Delete a user
-=========== ================= =======================
+=========== =========== =======================
+HTTP Method URI         Action
+=========== =========== =======================
+GET         /users      Retrieve list of users
+GET         /users/[id] Retrieve a user
+POST        /users      Create a new user
+PUT         /users/[id] Update an existing user
+DELETE      /users/[id] Delete a user
+=========== =========== =======================
 
 
 
@@ -30,17 +30,15 @@ Departments
 
 The ``/departments`` endpoint provides the Department ressource.
 
-=========== ======================= =============================
-HTTP Method URI                     Action
-=========== ======================= =============================
-GET         api/v0/departments      Retrieve list of departments
-GET         api/v0/departments/[id] Retrieve a department
-POST        api/v0/departments      Create a new department
-PUT         api/v0/departments/[id] Update an existing department
-DELETE      api/v0/departments/[id] Delete a department
-=========== ======================= =============================
-
-
+=========== ================= =============================
+HTTP Method URI               Action
+=========== ================= =============================
+GET         /departments      Retrieve list of departments
+GET         /departments/[id] Retrieve a department
+POST        /departments      Create a new department
+PUT         /departments/[id] Update an existing department
+DELETE      /departments/[id] Delete a department
+=========== ================= =============================
 
 
 

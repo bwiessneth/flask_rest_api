@@ -8,8 +8,7 @@ from flask_restful_swagger import swagger
 from flask_cors import CORS
 from config import Config
 
-app = Flask(__name__, static_url_path='/flask_rest_api/static')
-
+app = Flask(__name__)
 db = SQLAlchemy()
 ma = Marshmallow()
 
@@ -41,7 +40,7 @@ def create_app(config_class=Config):
 	# Create Api for this flask application using prefix
 	api.init_app(app)
 
-	app.register_blueprint(api_v0, url_prefix="/")
+	app.register_blueprint(api_v0)
 	return app
 
 

@@ -7,12 +7,6 @@ from flask import render_template, request
 from marshmallow import fields
 
 
-# Index endpoint
-@app.route("/")
-def index():
-	message = "Hello from flask_rest_api"
-	return render_template('index.html', message=message)
-
 
 class UserSchema(ma.Schema):
 	"""Marshmallow output schema"""

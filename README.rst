@@ -4,7 +4,30 @@ Flask REST API
 
 Basic REST API using Flask, Flask-RESTful, Flask-Marshmallow, and Flask-SQLAlchemy.
 
-All endpoints will return JSON formatted output.
+All endpoints return JSON formatted output.
+
+All endpoints return the actual data encapsulated in the ``data`` key, e.g.
+
+::
+
+	{
+	    "data":{
+		"id":2,
+		"username":"guest",
+		"email":"guest@example.com",
+		"_links":{
+		    [...]
+		}
+	    }
+	}
+
+
+
+**********************
+Endpoints / Ressources
+**********************
+
+.. image:: db_model.png
 
 
 
@@ -42,6 +65,19 @@ DELETE      /departments/[id] Delete a department
 
 
 
+Users within a Department
+=========================
+
+Users may have a relation to a Deparment (see app/models.py).
+
+=========== ======================= =========================================
+HTTP Method URI                     Action
+=========== ======================= =========================================
+GET         /departments/[id]/users Retrieve a list of users for a department
+=========== ======================= =========================================
+
+
+
 **********
 Pagination
 **********
@@ -52,7 +88,7 @@ Parameter
 =========
 
 For controlling the pagination there are currently two paramters in place.
-Both paramters can be passed as URL parameters (e.g. ``api/v0/users?limit=5&offset=2``).
+Both paramters can be passed as URL parameters (e.g. ``/users?limit=5&offset=2``).
 
 * ``limit``: Number of requested results per response/page
 * ``offset``: Offset of requested results
@@ -66,30 +102,11 @@ Every endpoint which supports pagination is indicating this by returning some in
 
 * ``total``: Total number of entities within the ressource
 
-.. code-block:: javascript
+::
 
-{
-    "offset": 2,
-    "limit": 5,
-    "total": 21,
-    "data": [..]
-}
-
-
-
-
-
-********************
-TODO: Authentication
-********************
-
-
-
-****************
-TODO: Rate limit
-****************
-
-
-*************
-TODO: Testing
-*************
+	{
+	    "offset":2,
+	    "limit":5,
+	    "total":21,
+	    "data":[...]
+	}

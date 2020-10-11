@@ -33,7 +33,7 @@ class UserResource(Resource):
 			user = User.query.get_or_404(id)
 			data = dict()
 			data["data"] = user_schema.dump(user)
-			return data			
+			return data
 		else:
 			parser = reqparse.RequestParser()
 			parser.add_argument('offset', type=int, help='Offset value invalid', default=0)
@@ -76,7 +76,10 @@ class UserResource(Resource):
 				user.department_id = None
 
 		db.session.commit()
-		return user_schema.dump(user)
+		user = User.query.get_or_404(id)
+		data = dict()
+		data["data"] = user_schema.dump(user)
+		return data
 
 	@swagger.operation()
 	def delete(self, id):
@@ -99,14 +102,14 @@ class DepartmentSchema(ma.Schema):
 
 class DepartmentResource(Resource):
 	"""API ressource for Departments"""
-	
-	@swagger.operation()	
+
+	@swagger.operation()
 	def get(self, id=None):
 		if id:
 			department = Department.query.get_or_404(id)
 			data = dict()
 			data["data"] = department_schema.dump(department)
-			return data						
+			return data
 		else:
 			parser = reqparse.RequestParser()
 			parser.add_argument('offset', type=int, help='Offset value invalid', default=0)

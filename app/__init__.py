@@ -9,6 +9,7 @@ from flask_cors import CORS
 from config import Config
 
 app = Flask(__name__)
+CORS(app)
 db = SQLAlchemy()
 ma = Marshmallow()
 
